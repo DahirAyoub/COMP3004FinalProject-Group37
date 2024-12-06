@@ -54,6 +54,11 @@ void Device::deleteUserProfile(int userID) {
     std::cout << "Error: User with ID " << userID << " not found.\n";
 }
 
+// Get all profiles
+std::vector<User> Device::getAllProfiles() const {
+    return userProfiles;
+}
+
 // Skin contact: Apply device to skin
 void Device::applyToSkin() {
     if (skinContact) {
@@ -82,24 +87,27 @@ bool Device::checkSkinContact() {
 
 // Start a measurement (enforce skin contact rules)
 void Device::startMeasurement() {
-    if (!skinContact) {
+    if (!checkSkinContact()) {
         std::cout << "Error: Apply the device to the skin before starting measurement.\n";
-        return;
-    }
-
-    if (measurementDone) {
-        std::cout << "Error: You must lift the device off the skin before starting a new measurement.\n";
         return;
     }
 
     std::cout << "Starting measurement...\n";
 
-    // Collect data
-    startDataCollection();
+    // Collect raw data
+    std::vector<float> rawData = dataCollector->collectData();
 
-    // Simulate measurement complete
-    measurementDone = true;
-    std::cout << "Measurement complete. Lift the device off the skin to reset.\n";
+    // Process raw data into metrics
+    std::vector<Metric> metrics = dataProcessor->processRawData(rawData);
+
+    // Display metrics
+    std::cout << "Processed Health Metrics:\n";
+    for (const auto& metric : metrics) {
+        std::cout << metric.getName() << " - Value: " << metric.getValue()
+                  << " - Status: " << metric.getStatus() << "\n";
+    }
+
+    std::cout << "Measurement complete.\n";
 }
 
 // Data collection method
@@ -111,13 +119,14 @@ void Device::startDataCollection() {
 
     std::cout << "Data collection started...\n";
 
-    // Use DataCollector to collect raw data
+    // Collect raw data and labels
     std::vector<float> rawData = dataCollector->collectData();
+    std::vector<std::string> labels = dataCollector->getMeasurementLabels();
 
-    // Display collected data
+    // Display collected data with labels
     std::cout << "Data collected from 24 body points:\n";
     for (size_t i = 0; i < rawData.size(); ++i) {
-        std::cout << "Point " << (i + 1) << ": " << rawData[i] << "\n";
+        std::cout << labels[i] << " - Value: " << rawData[i] << "\n";
     }
 
     std::cout << "Data collection completed.\n";

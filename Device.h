@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "User.h"  
+#include "User.h"
 #include "BatteryManager.h"
 #include "DataCollector.h"
 #include "DataProcessor.h"
@@ -34,14 +34,15 @@ public:
     void createUserProfile(int userID, const std::string& name, int age);
     void updateUserProfile(int userID, const std::string& newName, int newAge);
     void deleteUserProfile(int userID);
+    std::vector<User> getAllProfiles() const; // New method to retrieve all profiles
 
     // Skin contact methods
     void applyToSkin();
     void liftOffSkin();
 
-    // Measurement-related methods 
+    // Measurement-related methods
     void startMeasurement();
-    void startDataCollection(); 
+    void startDataCollection();
     bool checkSkinContact();
     void depleteBattery();
     void displayMetrics();

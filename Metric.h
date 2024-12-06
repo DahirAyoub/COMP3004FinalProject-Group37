@@ -5,15 +5,16 @@
 
 class Metric {
 private:
-    std::string metricName;
-    float value;
-    std::string range;
+    std::string metricName; // Name of the metric
+    float value;            // Measured value
+    std::string status;     // Status (e.g., "Normal", "High", "Low")
 
 public:
-    Metric(const std::string& name, float value, const std::string& range);
+    Metric(const std::string& name, float value, const std::string& status);
+
     std::string getName() const;
     float getValue() const;
-    std::string getRange() const;
+    std::string getStatus() const;
 };
 
 #endif // METRIC_H
