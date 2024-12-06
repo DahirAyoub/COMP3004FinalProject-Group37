@@ -15,6 +15,10 @@ private:
     std::string deviceID;
     float batteryLevel;
     std::string status;
+
+    bool skinContact;          // Indicates if the device is on the skin
+    bool measurementDone;      // Ensures lifting off between measurements
+
     BatteryManager* batteryManager;
     DataCollector* dataCollector;
     DataProcessor* dataProcessor;
@@ -30,6 +34,10 @@ public:
     void createUserProfile(int userID, const std::string& name, int age);
     void updateUserProfile(int userID, const std::string& newName, int newAge);
     void deleteUserProfile(int userID);
+
+    // Skin contact methods
+    void applyToSkin();
+    void liftOffSkin();
 
     // Measurement-related methods 
     void startMeasurement();
