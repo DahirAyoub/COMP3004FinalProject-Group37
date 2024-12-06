@@ -2,6 +2,8 @@
 #define DEVICE_H
 
 #include <string>
+#include <vector>
+#include "User.h"  
 #include "BatteryManager.h"
 #include "DataCollector.h"
 #include "DataProcessor.h"
@@ -19,10 +21,19 @@ private:
     MetricsVisualizer* visualizer;
     HistoricalDataManager* dataManager;
 
+    std::vector<User> userProfiles; // Store multiple user profiles (up to 5)
+
 public:
     Device(const std::string& id);
 
+    // User management methods
+    void createUserProfile(int userID, const std::string& name, int age);
+    void updateUserProfile(int userID, const std::string& newName, int newAge);
+    void deleteUserProfile(int userID);
+
+    // Measurement-related methods 
     void startMeasurement();
+    void startDataCollection(); 
     bool checkSkinContact();
     void depleteBattery();
     void displayMetrics();
