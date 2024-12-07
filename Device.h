@@ -16,8 +16,8 @@ private:
     float batteryLevel;
     std::string status;
 
-    bool skinContact;          // Indicates if the device is on the skin
-    bool measurementDone;      // Ensures lifting off between measurements
+    bool skinContact;
+    bool measurementDone;
 
     BatteryManager* batteryManager;
     DataCollector* dataCollector;
@@ -25,23 +25,20 @@ private:
     MetricsVisualizer* visualizer;
     HistoricalDataManager* dataManager;
 
-    std::vector<User> userProfiles; // Store multiple user profiles (up to 5)
-    int nextUserID;                 // Tracks the next available user ID
+    std::vector<User> userProfiles;
+    int nextUserID;
 
 public:
     Device(const std::string& id);
 
-    // User management methods
-    void createUserProfile(const std::string& name, int age, float height, float weight, const std::string& dob);
-    void updateUserProfile(int userID, const std::string& newName, int newAge, float newHeight, float newWeight, const std::string& newDob);
+    void createUserProfile(const std::string& name, float height, float weight, const std::string& dob);
+    void updateUserProfile(int userID, const std::string& newName, float newHeight, float newWeight, const std::string& newDob);
     void deleteUserProfile(int userID);
     std::vector<User> getAllProfiles() const;
 
-    // Skin contact methods
     void applyToSkin();
     void liftOffSkin();
 
-    // Measurement-related methods
     void startMeasurement();
     void startDataCollection();
     bool checkSkinContact();

@@ -12,23 +12,22 @@ Device::Device(const std::string& id)
       nextUserID(1) {}
 
 // Create a new user profile
-void Device::createUserProfile(const std::string& name, int age, float height, float weight, const std::string& dob) {
+void Device::createUserProfile(const std::string& name, float height, float weight, const std::string& dob) {
     if (userProfiles.size() >= 5) {
         std::cout << "Error: Maximum number of profiles (5) reached.\n";
         return;
     }
 
-    // Add the new user with the next available user ID
-    User newUser(nextUserID++, name, age, height, weight, dob);
+    User newUser(nextUserID++, name, height, weight, dob);
     userProfiles.push_back(newUser);
     userProfiles.back().createProfile();
 }
 
 // Update an existing user profile
-void Device::updateUserProfile(int userID, const std::string& newName, int newAge, float newHeight, float newWeight, const std::string& newDob) {
+void Device::updateUserProfile(int userID, const std::string& newName, float newHeight, float newWeight, const std::string& newDob) {
     for (auto& user : userProfiles) {
         if (user.getUserID() == userID) {
-            user.updateProfile(userID, newName, newAge, newHeight, newWeight, newDob);
+            user.updateProfile(userID, newName, newHeight, newWeight, newDob);
             return;
         }
     }
