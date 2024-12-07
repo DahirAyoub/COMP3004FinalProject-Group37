@@ -26,15 +26,16 @@ private:
     HistoricalDataManager* dataManager;
 
     std::vector<User> userProfiles; // Store multiple user profiles (up to 5)
+    int nextUserID;                 // Tracks the next available user ID
 
 public:
     Device(const std::string& id);
 
     // User management methods
-    void createUserProfile(int userID, const std::string& name, int age);
-    void updateUserProfile(int userID, const std::string& newName, int newAge);
+    void createUserProfile(const std::string& name, int age, float height, float weight, const std::string& dob);
+    void updateUserProfile(int userID, const std::string& newName, int newAge, float newHeight, float newWeight, const std::string& newDob);
     void deleteUserProfile(int userID);
-    std::vector<User> getAllProfiles() const; // New method to retrieve all profiles
+    std::vector<User> getAllProfiles() const;
 
     // Skin contact methods
     void applyToSkin();

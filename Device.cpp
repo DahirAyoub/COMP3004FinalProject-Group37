@@ -1,41 +1,34 @@
 #include "Device.h"
 #include <iostream>
-#include <algorithm>
 
+// Constructor
 Device::Device(const std::string& id)
     : deviceID(id), batteryLevel(100.0f), status("Idle"), skinContact(false), measurementDone(false),
       batteryManager(new BatteryManager(100.0f)),
       dataCollector(new DataCollector()),
       dataProcessor(new DataProcessor()),
       visualizer(new MetricsVisualizer("Chart")),
-      dataManager(new HistoricalDataManager()) {}
+      dataManager(new HistoricalDataManager()),
+      nextUserID(1) {}
 
-// Create a new user profile on this device
-void Device::createUserProfile(int userID, const std::string& name, int age) {
+// Create a new user profile
+void Device::createUserProfile(const std::string& name, int age, float height, float weight, const std::string& dob) {
     if (userProfiles.size() >= 5) {
         std::cout << "Error: Maximum number of profiles (5) reached.\n";
         return;
     }
 
-    // Check if userID already exists
-    for (const auto& user : userProfiles) {
-        if (user.getUserID() == userID) {
-            std::cout << "Error: A user with ID " << userID << " already exists.\n";
-            return;
-        }
-    }
-
-    // Add the new user and call createProfile()
-    User newUser(userID, name, age);
+    // Add the new user with the next available user ID
+    User newUser(nextUserID++, name, age, height, weight, dob);
     userProfiles.push_back(newUser);
     userProfiles.back().createProfile();
 }
 
 // Update an existing user profile
-void Device::updateUserProfile(int userID, const std::string& newName, int newAge) {
+void Device::updateUserProfile(int userID, const std::string& newName, int newAge, float newHeight, float newWeight, const std::string& newDob) {
     for (auto& user : userProfiles) {
         if (user.getUserID() == userID) {
-            user.updateProfile(userID, newName, newAge);
+            user.updateProfile(userID, newName, newAge, newHeight, newWeight, newDob);
             return;
         }
     }
