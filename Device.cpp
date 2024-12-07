@@ -1,54 +1,128 @@
 #include "Device.h"
 #include <iostream>
+#include <algorithm>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 
 // Constructor
 Device::Device(const std::string& id)
-    : deviceID(id), batteryLevel(100.0f), status("Idle"), skinContact(false), measurementDone(false),
+    : deviceID(id),
+      batteryLevel(100.0f),
+      status("Idle"),
+      currentLoggedInUser(""),
+      nextUserID(1),
+      skinContact(false),
+      measurementDone(false),
       batteryManager(new BatteryManager(100.0f)),
       dataCollector(new DataCollector()),
       dataProcessor(new DataProcessor()),
       visualizer(new MetricsVisualizer("Chart")),
-      dataManager(new HistoricalDataManager()),
-      nextUserID(1) {}
+      dataManager(new HistoricalDataManager()) {}
+
+static std::string getCurrentTimestamp() {
+    auto now = std::chrono::system_clock::now();
+    auto timeT = std::chrono::system_clock::to_time_t(now);
+    std::tm tmStruct = *std::localtime(&timeT);
+
+    std::ostringstream oss;
+    oss << std::put_time(&tmStruct, "%Y-%m-%d %H:%M:%S");
+    return oss.str();
+}
+
+// Authentication
+bool Device::registerAccount(const std::string& username, const std::string& password) {
+    if (credentials.count(username)) {
+        std::cout << "Error: Username already exists.\n";
+        return false;
+    }
+    credentials[username] = password;
+    std::cout << "Account registered successfully.\n";
+    return true;
+}
+
+bool Device::login(const std::string& username, const std::string& password) {
+    if (credentials.find(username) == credentials.end() || credentials[username] != password) {
+        std::cout << "Error: Invalid username or password.\n";
+        return false;
+    }
+    currentLoggedInUser = username;
+    std::cout << "Logged in successfully as " << username << ".\n";
+
+    // Load or create user profile
+    if (accounts.find(username) == accounts.end()) {
+        accounts[username] = User(nextUserID++, username, 0.0f, 0.0f, "");
+    }
+    return true;
+}
+
+void Device::logout() {
+    if (currentLoggedInUser.empty()) {
+        std::cout << "No user is currently logged in.\n";
+        return;
+    }
+    std::cout << "User " << currentLoggedInUser << " logged out.\n";
+    currentLoggedInUser.clear();
+}
 
 // Create a new user profile
 void Device::createUserProfile(const std::string& name, float height, float weight, const std::string& dob) {
-    if (userProfiles.size() >= 5) {
-        std::cout << "Error: Maximum number of profiles (5) reached.\n";
+    if (!isLoggedIn()) {
+        std::cout << "Error: No user logged in. Please log in to create a profile.\n";
         return;
     }
-
-    User newUser(nextUserID++, name, height, weight, dob);
-    userProfiles.push_back(newUser);
-    userProfiles.back().createProfile();
+    accounts[currentLoggedInUser] = User(nextUserID++, name, height, weight, dob);
+    std::cout << "Profile created successfully for " << currentLoggedInUser << ".\n";
 }
 
 // Update an existing user profile
-void Device::updateUserProfile(int userID, const std::string& newName, float newHeight, float newWeight, const std::string& newDob) {
-    for (auto& user : userProfiles) {
-        if (user.getUserID() == userID) {
-            user.updateProfile(userID, newName, newHeight, newWeight, newDob);
-            return;
-        }
+void Device::updateUserProfile(const std::string& username, const std::string& newName, float newHeight, float newWeight, const std::string& newDob) {
+    if (!isLoggedIn()) {
+        std::cout << "Error: No user logged in. Please log in to update a profile.\n";
+        return;
     }
-    std::cout << "Error: User with ID " << userID << " not found.\n";
+    if (accounts.find(username) == accounts.end()) {
+        std::cout << "Error: User profile not found.\n";
+        return;
+    }
+    User& user = accounts[username];
+    user.updateProfile(newName, newHeight, newWeight, newDob);
+    std::cout << "Profile updated successfully for " << username << ".\n";
 }
 
 // Delete a user profile
 void Device::deleteUserProfile(int userID) {
-    for (auto it = userProfiles.begin(); it != userProfiles.end(); ++it) {
-        if (it->getUserID() == userID) {
-            it->deleteProfile(userID);
-            userProfiles.erase(it);
-            return;
-        }
+    if (!isLoggedIn()) {
+        std::cout << "Error: No user logged in. Please log in to delete a profile.\n";
+        return;
     }
-    std::cout << "Error: User with ID " << userID << " not found.\n";
+    auto& user = accounts[currentLoggedInUser];
+    if (user.getUserID() != userID) {
+        std::cout << "Error: User ID does not match the logged-in user.\n";
+        return;
+    }
+    accounts.erase(currentLoggedInUser);
+    std::cout << "Profile deleted successfully for " << currentLoggedInUser << ".\n";
+    logout();
 }
 
-// Get all profiles
+// Get all profiles (for debugging purposes)
 std::vector<User> Device::getAllProfiles() const {
-    return userProfiles;
+    std::vector<User> profiles;
+    for (const auto& account : accounts) {
+        profiles.push_back(account.second);
+    }
+    return profiles;
+}
+
+// Get the logged-in username
+std::string Device::getLoggedInUser() const {
+    return currentLoggedInUser;
+}
+
+// Helpers
+bool Device::isLoggedIn() const {
+    return !currentLoggedInUser.empty();
 }
 
 // Skin contact: Apply device to skin
@@ -132,6 +206,20 @@ void Device::displayMetrics() {
     // Placeholder for displaying previously processed metrics
 }
 
-void Device::storeProcessedData() {
-    // Placeholder for storing processed metrics in historical data
+void Device::storeProcessedData(const std::vector<Metric>& metrics) {
+    if (!isLoggedIn()) {
+        std::cout << "Error: Cannot store data, no user logged in.\n";
+        return;
+    }
+
+    User &user = accounts[currentLoggedInUser];
+    int userID = user.getUserID();
+
+    std::string timestamp = getCurrentTimestamp();
+    HealthData record(timestamp, metrics);
+
+    // Now we store data with the userID
+    dataManager->storeData(userID, record);
+
+    std::cout << "Processed data stored for user: " << currentLoggedInUser << "\n";
 }

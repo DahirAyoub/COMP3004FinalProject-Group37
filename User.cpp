@@ -5,49 +5,35 @@
 #include <iomanip>
 #include <ctime>
 
-// Constructor
+// Default constructor
+User::User() : userID(-1), name(""), height(0.0f), weight(0.0f), dob("") {}
+
+// Parameterized constructor
 User::User(int id, const std::string& name, float height, float weight, const std::string& dob)
     : userID(id), name(name), height(height), weight(weight), dob(dob) {}
 
-// Create Profile
-void User::createProfile() {
-    std::cout << "User profile created with ID: " << userID
-              << ", Name: " << name
+// Update Profile (no longer requires userID verification since updates are managed by the current logged-in user)
+void User::updateProfile(const std::string& newName, float newHeight, float newWeight, const std::string& newDob) {
+    name = newName;
+    height = newHeight;
+    weight = newWeight;
+    dob = newDob;
+
+    std::cout << "User profile updated: Name: " << name
               << ", Height: " << height << " cm"
               << ", Weight: " << weight << " kg"
               << ", DOB: " << dob << "\n";
 }
 
-// Update Profile
-void User::updateProfile(int id, const std::string& newName, float newHeight, float newWeight, const std::string& newDob) {
-    if (id == userID) {
-        name = newName;
-        height = newHeight;
-        weight = newWeight;
-        dob = newDob;
-        std::cout << "User profile updated: ID " << userID
-                  << ", New Name: " << name
-                  << ", New Height: " << height << " cm"
-                  << ", New Weight: " << weight << " kg"
-                  << ", New DOB: " << dob << "\n";
-    } else {
-        std::cout << "Error: User ID " << id << " does not match.\n";
-    }
-}
-
-// Delete Profile
-void User::deleteProfile(int id) {
-    if (id == userID) {
-        userID = -1;
-        name.clear();
-        height = 0.0f;
-        weight = 0.0f;
-        dob.clear();
-        profileData.clear();
-        std::cout << "User profile with ID " << id << " has been deleted.\n";
-    } else {
-        std::cout << "Error: User ID " << id << " does not match.\n";
-    }
+// Delete Profile (modified to be handled at the `Device` level)
+void User::deleteProfile() {
+    userID = -1;
+    name.clear();
+    height = 0.0f;
+    weight = 0.0f;
+    dob.clear();
+    profileData.clear();
+    std::cout << "User profile has been deleted.\n";
 }
 
 // Retrieve historical data
@@ -61,6 +47,12 @@ std::string User::getName() const { return name; }
 float User::getHeight() const { return height; }
 float User::getWeight() const { return weight; }
 std::string User::getDob() const { return dob; }
+
+// Setters for updating individual fields
+void User::setName(const std::string& newName) { name = newName; }
+void User::setHeight(float newHeight) { height = newHeight; }
+void User::setWeight(float newWeight) { weight = newWeight; }
+void User::setDob(const std::string& newDob) { dob = newDob; }
 
 // Calculate Age
 int User::calculateAge() const {

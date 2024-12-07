@@ -20,10 +20,9 @@ std::vector<float> DataCollector::collectData() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     rawData.clear();
-    // Simulate collecting data for 24 points based on the Ryodoraku chart's range (e.g., 10 to 150)
+    // Updated range based on the Ryodoraku chart: [5, 160]
     for (int i = 0; i < 24; ++i) {
-        // Generate random value in range [10, 150]
-        float value = static_cast<float>(std::rand() % 141 + 10);
+        float value = static_cast<float>(std::rand() % 156 + 5);
         rawData.push_back(value);
     }
 
