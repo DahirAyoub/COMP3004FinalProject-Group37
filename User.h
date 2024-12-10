@@ -11,23 +11,41 @@ class User {
 private:
     int userID;
     std::string name;
-    float height; // Height in cm
-    float weight; // Weight in kg
-    std::string dob; // Date of Birth
+    float height;       // in cm
+    float weight;       // in kg
+    std::string dob;    // YYYY-MM-DD
+
+    std::string username;
+    std::string passwordHash;
 
     std::vector<HealthData> profileData;
+
+    // Placeholder password hashing
+    std::string hashPassword(const std::string& password) const;
 
 public:
     // Default constructor
     User();
 
-    // Parameterized constructor
+    // Constructor without username/password
     User(int id, const std::string& name, float height, float weight, const std::string& dob);
 
-    // Profile management methods
+    // Constructor with username/password
+    User(int id, const std::string& name, float height, float weight, const std::string& dob,
+         const std::string& username, const std::string& password);
+
+    // Profile management
+    void createProfile();
     void updateProfile(const std::string& newName, float newHeight, float newWeight, const std::string& newDob);
-    void deleteProfile(); // Modified to no longer take userID
+    void updateProfile(int id, const std::string& newName, float newHeight, float newWeight,
+                       const std::string& newDob, const std::string& newUsername, const std::string& newPassword);
+    void deleteProfile();
+    void deleteProfile(int id);
     std::vector<HealthData> retrieveHistoricalData(HistoricalDataManager* manager);
+
+    // Authentication
+    std::string getUsername() const;
+    bool verifyPassword(const std::string& password) const;
 
     // Getters
     int getUserID() const;
@@ -35,12 +53,6 @@ public:
     float getHeight() const;
     float getWeight() const;
     std::string getDob() const;
-
-    // Setters for field-specific updates
-    void setName(const std::string& newName);
-    void setHeight(float newHeight);
-    void setWeight(float newWeight);
-    void setDob(const std::string& newDob);
 
     // Age calculation
     int calculateAge() const;

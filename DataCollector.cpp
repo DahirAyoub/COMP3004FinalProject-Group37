@@ -1,29 +1,48 @@
 #include "DataCollector.h"
-#include <cstdlib>
+#include <cmath>
 #include <ctime>
 
 DataCollector::DataCollector() {
-    // Initialize labels for 24 points
     measurementLabels = {
-        "Point 1: Head", "Point 2: Neck", "Point 3: Left Shoulder", "Point 4: Right Shoulder",
-        "Point 5: Left Arm", "Point 6: Right Arm", "Point 7: Heart", "Point 8: Lungs",
-        "Point 9: Liver", "Point 10: Stomach", "Point 11: Left Kidney", "Point 12: Right Kidney",
-        "Point 13: Bladder", "Point 14: Small Intestine", "Point 15: Large Intestine",
-        "Point 16: Spleen", "Point 17: Gallbladder", "Point 18: Pancreas",
-        "Point 19: Left Leg", "Point 20: Right Leg", "Point 21: Left Foot",
-        "Point 22: Right Foot", "Point 23: Spine", "Point 24: Nervous System"
+        "H1 (Left)", "H2 (Left)", "H3 (Left)", "H4 (Left)", "H5 (Left)", "H6 (Left)",
+        "H1 (Right)", "H2 (Right)", "H3 (Right)", "H4 (Right)", "H5 (Right)", "H6 (Right)",
+        "F1 (Left)", "F2 (Left)", "F3 (Left)", "F4 (Left)", "F5 (Left)", "F6 (Left)",
+        "F1 (Right)", "F2 (Right)", "F3 (Right)", "F4 (Right)", "F5 (Right)", "F6 (Right)"
     };
+    generator.seed(static_cast<unsigned>(std::time(nullptr)));
+}
+
+float DataCollector::generateMeasurementValue(float base, float deviation, bool isExcited, bool isInhibited) {
+    if (isExcited) base += 20.0f;
+    if (isInhibited) base -= 20.0f;
+
+    std::normal_distribution<float> distribution(base, deviation);
+    float value = distribution(generator);
+    return std::fmax(10.0f, std::fmin(150.0f, value));
 }
 
 std::vector<float> DataCollector::collectData() {
-    // Seed random number generator
-    std::srand(static_cast<unsigned>(std::time(nullptr)));
+    std::vector<float> rawData;
 
-    rawData.clear();
-    // Updated range based on the Ryodoraku chart: [5, 160]
-    for (int i = 0; i < 24; ++i) {
-        float value = static_cast<float>(std::rand() % 156 + 5);
-        rawData.push_back(value);
+    float handBase = 50.0f;
+    float footBase = 70.0f;
+    float deviation = 10.0f;
+
+    // Left hand points
+    for (int i = 0; i < 6; ++i) {
+        rawData.push_back(generateMeasurementValue(handBase, deviation, i==2, i==4));
+    }
+    // Right hand points
+    for (int i = 0; i < 6; ++i) {
+        rawData.push_back(generateMeasurementValue(handBase, deviation, i==2, i==4));
+    }
+    // Left foot points
+    for (int i = 0; i < 6; ++i) {
+        rawData.push_back(generateMeasurementValue(footBase, deviation, i==3, i==5));
+    }
+    // Right foot points
+    for (int i = 0; i < 6; ++i) {
+        rawData.push_back(generateMeasurementValue(footBase, deviation, i==3, i==5));
     }
 
     return rawData;

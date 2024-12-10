@@ -5,12 +5,13 @@
 #include <vector>
 #include <map>
 #include "User.h"
+#include "Metric.h"
 #include "BatteryManager.h"
 #include "DataCollector.h"
 #include "DataProcessor.h"
 #include "MetricsVisualizer.h"
 #include "HistoricalDataManager.h"
-#include "Metric.h" // Ensure we have Metric included if not already
+#include "HealthData.h"
 
 class Device {
 private:
@@ -18,7 +19,7 @@ private:
     float batteryLevel;
     std::string status;
 
-    std::string currentLoggedInUser; // Current logged-in username
+    std::string currentLoggedInUser;
     int nextUserID;
 
     bool skinContact;
@@ -30,39 +31,70 @@ private:
     MetricsVisualizer* visualizer;
     HistoricalDataManager* dataManager;
 
-    std::map<std::string, std::string> credentials; // Username-password map
-    std::map<std::string, User> accounts;           // Username-user profile map
+    // Authentication and profiles
+    std::map<std::string, std::string> credentials;
+    std::map<std::string, User> accounts;
+
+    static const int maxProfiles = 5;
+
+    // Body region metrics
+    std::map<std::string, Metric> bodyRegionMetrics;
+
+    // Private methods
+    void initializeDefaultMetrics();
+    static float normalizeValue(float rawValue, float rawMin = 0.0f, float rawMax = 200.0f,
+                                float targetMin = 80.0f, float targetMax = 120.0f);
+    void depleteBatteryDuringOperation(float amount);
+    void showLowPowerWarning() const;
+
+    // Utility method for timestamp generation
+    std::string getCurrentTimestamp() const;
 
 public:
     Device(const std::string& id);
 
     // User management
-    void createUserProfile(const std::string& name, float height, float weight, const std::string& dob);
-    void updateUserProfile(const std::string& username, const std::string& newName, float newHeight, float newWeight, const std::string& newDob);
-    void deleteUserProfile(int userID);
-    std::vector<User> getAllProfiles() const;
-
-    // Authentication
     bool registerAccount(const std::string& username, const std::string& password);
     bool login(const std::string& username, const std::string& password);
-    std::string getLoggedInUser() const; // Get currently logged-in user
+    bool authenticate(const std::string& username, const std::string& password);
     void logout();
+    std::string getLoggedInUser() const;
 
-    // Skin contact methods
+    void createUserProfile(const std::string& name, float height, float weight, const std::string& dob);
+    bool createUserProfile(const std::string& name, float height, float weight, const std::string& dob,
+                           const std::string& username, const std::string& password);
+    void updateUserProfile(const std::string& username, const std::string& newName, float newHeight, float newWeight, const std::string& newDob);
+    void updateUserProfile(int userID, const std::string& newName, float newHeight, float newWeight,
+                           const std::string& newDob, const std::string& newUsername, const std::string& newPassword);
+    void deleteUserProfile(int userID);
+    std::vector<User> getAllProfiles() const;
+    const User* getUserProfile(const std::string& username) const;
+
+    // Skin contact
     void applyToSkin();
     void liftOffSkin();
+    bool checkSkinContact() const;
 
-    // Measurement-related methods
+    // Measurement
     void startMeasurement();
     void startDataCollection();
-    bool checkSkinContact();
     void depleteBattery();
     void displayMetrics();
-
-    // Store processed data for the current user
     void storeProcessedData(const std::vector<Metric>& metrics);
+    void storeProcessedData();
 
-    // Helpers
+    float getBatteryLevel() const;
+
+    // Historical data
+    std::vector<HealthData> getAllUserData() const;
+
+    // Data collection
+    std::vector<float> collectMeasurementData();
+    std::vector<std::string> getMeasurementLabels() const;
+
+    // Get metrics
+    std::vector<Metric> getBodyRegionMetrics() const;
+
     bool isLoggedIn() const;
 };
 

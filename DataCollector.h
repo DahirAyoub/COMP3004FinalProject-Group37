@@ -3,11 +3,14 @@
 
 #include <vector>
 #include <string>
+#include <random>
 
 class DataCollector {
 private:
-    std::vector<float> rawData;
     std::vector<std::string> measurementLabels;
+    std::default_random_engine generator;
+
+    float generateMeasurementValue(float base, float deviation, bool isExcited, bool isInhibited);
 
 public:
     DataCollector();

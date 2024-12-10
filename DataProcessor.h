@@ -7,13 +7,16 @@
 
 class DataProcessor {
 private:
-    std::vector<Metric> processedMetrics;
-
-    // Interpret the value based on defined thresholds
-    std::string interpretValue(float value) const;
+    float calculateAverage(const std::vector<float>& data);
+    std::vector<std::pair<std::string, std::string>> analyzeSymmetry(
+        const std::vector<float>& data, const std::vector<std::string>& labels);
+    std::vector<Metric> classifyMetrics(const std::vector<float>& data, float average, const std::vector<std::string>& labels);
 
 public:
-    std::vector<Metric> processRawData(const std::vector<float>& rawData);
+    DataProcessor();
+
+    // Process raw data and labels into metrics
+    std::vector<Metric> processRawData(const std::vector<float>& rawData, const std::vector<std::string>& labels);
 };
 
 #endif // DATAPROCESSOR_H
