@@ -8,6 +8,6 @@ void MetricsVisualizer::displayMetrics(const std::vector<Metric>& metrics) {
     for (const auto& metric : metrics) {
         std::cout << "Metric: " << metric.getName()
                   << ", Value: " << metric.getValue()
-                  << ", Range: " << metric.getRange() << std::endl;
+                  << ", Range: " << metric.getStatus() << std::endl;
     }
 }

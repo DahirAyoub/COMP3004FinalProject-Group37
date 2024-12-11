@@ -11,23 +11,51 @@ class User {
 private:
     int userID;
     std::string name;
-    int age;
+    float height;       // in cm
+    float weight;       // in kg
+    std::string dob;    // YYYY-MM-DD
+
+    std::string username;
+    std::string passwordHash;
+
     std::vector<HealthData> profileData;
 
-public:
-    User(int id, const std::string& name, int age);
+    // Placeholder password hashing
+    std::string hashPassword(const std::string& password) const;
 
+public:
+    // Default constructor
+    User();
+
+    // Constructor without username/password
+    User(int id, const std::string& name, float height, float weight, const std::string& dob);
+
+    // Constructor with username/password
+    User(int id, const std::string& name, float height, float weight, const std::string& dob,
+         const std::string& username, const std::string& password);
+
+    // Profile management
     void createProfile();
-    void updateProfile(int id, const std::string& newName, int newAge);
+    void updateProfile(const std::string& newName, float newHeight, float newWeight, const std::string& newDob);
+    void updateProfile(int id, const std::string& newName, float newHeight, float newWeight,
+                       const std::string& newDob, const std::string& newUsername, const std::string& newPassword);
+    void deleteProfile();
     void deleteProfile(int id);
     std::vector<HealthData> retrieveHistoricalData(HistoricalDataManager* manager);
 
-    // Getters and setters
+    // Authentication
+    std::string getUsername() const;
+    bool verifyPassword(const std::string& password) const;
+
+    // Getters
     int getUserID() const;
-    void setName(const std::string& newName);
-    void setAge(int newAge);
     std::string getName() const;
-    int getAge() const;
+    float getHeight() const;
+    float getWeight() const;
+    std::string getDob() const;
+
+    // Age calculation
+    int calculateAge() const;
 };
 
 #endif // USER_H

@@ -1,10 +1,13 @@
 #include "HistoricalDataManager.h"
 
-void HistoricalDataManager::storeData(const HealthData& data) {
-    historicalRecords.push_back(data);
+void HistoricalDataManager::storeData(int userID, const HealthData& data) {
+    userHistory[userID].push_back(data);
 }
 
-std::vector<HealthData> HistoricalDataManager::retrieveData(int userID) {
-    // Retrieve all historical data for the given user (example implementation)
-    return historicalRecords;
+std::vector<HealthData> HistoricalDataManager::retrieveData(int userID) const {
+    auto it = userHistory.find(userID);
+    if (it != userHistory.end()) {
+        return it->second;
+    }
+    return {};
 }

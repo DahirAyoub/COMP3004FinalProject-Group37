@@ -2,13 +2,22 @@
 #define DATACOLLECTOR_H
 
 #include <vector>
+#include <string>
+#include <random>
 
 class DataCollector {
 private:
-    std::vector<float> rawData;
+    std::vector<std::string> measurementLabels;
+    std::default_random_engine generator;
+
+    // Helper function to generate synthetic data based on Ryodoraku methodology
+    float generateMeasurementValue(float base, float deviation, bool isExcited, bool isInhibited);
 
 public:
+    DataCollector();
+
     std::vector<float> collectData();
+    std::vector<std::string> getMeasurementLabels() const;
 };
 
 #endif // DATACOLLECTOR_H
