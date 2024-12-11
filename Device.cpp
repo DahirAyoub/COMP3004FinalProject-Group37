@@ -1,13 +1,12 @@
 #include "Device.h"
-#include "Metric.h"
 #include <iostream>
 #include <algorithm>
 #include <chrono>
 #include <iomanip>
 #include <sstream>
 #include <random>
+#include <ctime>
 
-// Constructor
 Device::Device(const std::string& id)
     : deviceID(id),
       batteryLevel(100.0f),
@@ -22,11 +21,10 @@ Device::Device(const std::string& id)
       visualizer(new MetricsVisualizer("Chart")),
       dataManager(new HistoricalDataManager())
 {
-    // Initialize default metrics once the device is created
     initializeDefaultMetrics();
 }
 
-static std::string getCurrentTimestamp() {
+static std::string getCurrentTimestampStatic() {
     auto now = std::chrono::system_clock::now();
     auto timeT = std::chrono::system_clock::to_time_t(now);
     std::tm tmStruct = *std::localtime(&timeT);
@@ -34,6 +32,14 @@ static std::string getCurrentTimestamp() {
     std::ostringstream oss;
     oss << std::put_time(&tmStruct, "%Y-%m-%d %H:%M:%S");
     return oss.str();
+}
+
+std::string Device::getCurrentTimestamp() const {
+    auto now = std::chrono::system_clock::now();
+    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+    char buffer[100];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&currentTime));
+    return std::string(buffer);
 }
 
 float Device::normalizeValue(float rawValue, float rawMin, float rawMax, float targetMin, float targetMax) {
@@ -56,7 +62,6 @@ bool Device::checkSkinContact() const {
 }
 
 void Device::initializeDefaultMetrics() {
-    // Assign default values and thresholds for each region
     bodyRegionMetrics = {
         {"Head", Metric("Head", 100.0f, "Normal", "Conductivity of the head region.", 80.0f, 120.0f)},
         {"Neck", Metric("Neck", 100.0f, "Normal", "Conductivity of the neck region.", 80.0f, 120.0f)},
@@ -72,7 +77,6 @@ void Device::initializeDefaultMetrics() {
     };
 }
 
-// From your version of user management:
 bool Device::registerAccount(const std::string& username, const std::string& password) {
     if (credentials.count(username)) {
         std::cout << "Error: Username already exists.\n";
@@ -84,7 +88,6 @@ bool Device::registerAccount(const std::string& username, const std::string& pas
 }
 
 bool Device::authenticate(const std::string& username, const std::string& password) {
-    // Unified authentication approach
     if (credentials.find(username) == credentials.end() || credentials[username] != password) {
         std::cout << "Authentication failed: Invalid username or password.\n";
         return false;
@@ -107,7 +110,10 @@ void Device::logout() {
     }
 }
 
-// Create a new user profile (your simpler version)
+std::string Device::getLoggedInUser() const {
+    return currentLoggedInUser;
+}
+
 void Device::createUserProfile(const std::string& name, float height, float weight, const std::string& dob) {
     if (!isLoggedIn()) {
         std::cout << "Error: No user logged in.\n";
@@ -117,10 +123,8 @@ void Device::createUserProfile(const std::string& name, float height, float weig
     std::cout << "Profile created successfully for " << currentLoggedInUser << ".\n";
 }
 
-// Create a new user profile (collaborator’s version with username/password)
 bool Device::createUserProfile(const std::string& name, float height, float weight, const std::string& dob,
                                const std::string& username, const std::string& password) {
-    // Check max profiles
     if ((int)accounts.size() >= maxProfiles) {
         std::cout << "Error: Maximum number of profiles (" << maxProfiles << ") reached.\n";
         return false;
@@ -131,7 +135,6 @@ bool Device::createUserProfile(const std::string& name, float height, float weig
         return false;
     }
 
-    // Register account
     if (!registerAccount(username, password)) {
         return false;
     }
@@ -141,7 +144,6 @@ bool Device::createUserProfile(const std::string& name, float height, float weig
     return true;
 }
 
-// Update profile (your version)
 void Device::updateUserProfile(const std::string& username, const std::string& newName, float newHeight, float newWeight, const std::string& newDob) {
     if (!isLoggedIn()) {
         std::cout << "Error: No user logged in.\n";
@@ -156,14 +158,11 @@ void Device::updateUserProfile(const std::string& username, const std::string& n
     std::cout << "Profile updated successfully for " << username << ".\n";
 }
 
-// Update profile (collaborator’s extended version with username/password)
 void Device::updateUserProfile(int userID, const std::string& newName, float newHeight, float newWeight,
                                const std::string& newDob, const std::string& newUsername, const std::string& newPassword) {
-    // Find user by ID in accounts map
     for (auto& kv : accounts) {
         User& user = kv.second;
         if (user.getUserID() == userID) {
-            // Update and also update credentials if username changes
             if (newUsername != kv.first) {
                 if (credentials.find(newUsername) != credentials.end()) {
                     std::cout << "Error: New username '" << newUsername << "' already exists.\n";
@@ -176,28 +175,22 @@ void Device::updateUserProfile(int userID, const std::string& newName, float new
                 std::cout << "Profile updated successfully with new username.\n";
                 return;
             }
-
-            // Same username, just update password and other fields
             credentials[newUsername] = newPassword;
             user.updateProfile(userID, newName, newHeight, newWeight, newDob, newUsername, newPassword);
             return;
         }
     }
-
     std::cout << "Error: User with ID " << userID << " not found.\n";
 }
 
-// Delete profile
 void Device::deleteUserProfile(int userID) {
     if (!isLoggedIn()) {
         std::cout << "Error: No user logged in.\n";
         return;
     }
 
-    // Check if logged-in user's ID matches userID
     for (auto it = accounts.begin(); it != accounts.end(); ++it) {
         if (it->second.getUserID() == userID) {
-            // Remove from credentials
             credentials.erase(it->first);
             it->second.deleteProfile();
             accounts.erase(it);
@@ -217,7 +210,6 @@ std::vector<User> Device::getAllProfiles() const {
     return profiles;
 }
 
-// Get user profile by username
 const User* Device::getUserProfile(const std::string& username) const {
     auto it = accounts.find(username);
     if (it != accounts.end()) {
@@ -226,15 +218,10 @@ const User* Device::getUserProfile(const std::string& username) const {
     return nullptr;
 }
 
-std::string Device::getLoggedInUser() const {
-    return currentLoggedInUser;
-}
-
 bool Device::isLoggedIn() const {
     return !currentLoggedInUser.empty();
 }
 
-// Apply and lift device from skin
 void Device::applyToSkin() {
     if (skinContact) {
         std::cout << "Device is already on the skin.\n";
@@ -258,10 +245,14 @@ float Device::getBatteryLevel() const {
     return batteryManager->checkBatteryLevel();
 }
 
-// Start a measurement (enhanced)
 void Device::startMeasurement() {
     if (!checkSkinContact()) {
         std::cerr << "Error: Device must be applied to skin before starting measurement.\n";
+        return;
+    }
+
+    if (measurementDone) {
+        std::cerr << "Error: Measurement already done. Lift off skin before taking another.\n";
         return;
     }
 
@@ -274,40 +265,39 @@ void Device::startMeasurement() {
     }
 
     depleteBatteryDuringOperation(2.0f);
+    std::cout << "Collecting and processing data...\n";
 
-    std::cout << "Collecting and processing metrics...\n";
+    // Collect full 24-point data
+    std::vector<float> rawData = dataCollector->collectData();
+    auto labels = dataCollector->getMeasurementLabels();
 
     std::vector<Metric> metrics;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dist(0.0f, 200.0f);
+    for (size_t i = 0; i < rawData.size(); ++i) {
+        float val = rawData[i];
+        std::string name = labels[i];
+        std::string status = "Normal";
+        if (val < 80.0f) status = "Low";
+        else if (val > 120.0f) status = "High";
 
-    for (auto &pair : bodyRegionMetrics) {
-        Metric &metric = pair.second;
-        float randomValue = static_cast<float>(dist(gen));
-        float normalizedValue = normalizeValue(randomValue, 0.0f, 200.0f, metric.getMinThreshold(), metric.getMaxThreshold());
-        metric.setValue(normalizedValue);
-
-        if (normalizedValue < metric.getMinThreshold())
-            metric.setStatus("Low");
-        else if (normalizedValue > metric.getMaxThreshold())
-            metric.setStatus("High");
-        else
-            metric.setStatus("Normal");
-
-        metrics.push_back(metric);
+        Metric m(name, val, status, "Ryodoraku metric point", 80.0f, 120.0f);
+        metrics.push_back(m);
     }
 
     storeProcessedData(metrics);
+    measurementDone = true;
+
+    bodyRegionMetrics.clear();
+    for (const auto &m : metrics) {
+        bodyRegionMetrics[m.getName()] = m;
+    }
 
     std::cout << "Battery level after measurement: " << getBatteryLevel() << "%\n";
-
     for (const auto &metric : metrics) {
         std::cout << metric.getName() << ": " << metric.getValue() << " μA (" << metric.getStatus() << ")\n";
     }
-
     std::cout << "Measurement concluded.\n";
 }
+
 void Device::startDataCollection() {
     if (!checkSkinContact()) {
         std::cout << "Error: Device must be applied to skin to collect data.\n";
@@ -324,8 +314,6 @@ void Device::startDataCollection() {
     }
 
     std::cout << "Data collection completed.\n";
-
-    // Could process and store data if needed
 }
 
 void Device::depleteBattery() {
@@ -333,7 +321,7 @@ void Device::depleteBattery() {
 }
 
 void Device::displayMetrics() {
-    // Placeholder
+    // Placeholder, depending on logic needed
 }
 
 void Device::storeProcessedData(const std::vector<Metric>& metrics) {
@@ -342,16 +330,10 @@ void Device::storeProcessedData(const std::vector<Metric>& metrics) {
         return;
     }
 
-    // Generate timestamp for the current record
     std::string timestamp = getCurrentTimestamp();
-
-    // Create a new HealthData record
     HealthData record(timestamp, metrics);
 
-    // Retrieve the current user
     User &user = accounts[currentLoggedInUser];
-
-    // Store the data using DataManager
     dataManager->storeData(user.getUserID(), record);
 
     std::cout << "Processed data stored for user: " << currentLoggedInUser << "\n";
@@ -363,20 +345,14 @@ std::vector<HealthData> Device::getAllUserData() const {
         return {};
     }
 
-    // Retrieve the current user
     const User &user = accounts.at(currentLoggedInUser);
-
-    // Retrieve all data for the user from DataManager
     return dataManager->retrieveData(user.getUserID());
 }
 
-
-// Collect measurement data
 std::vector<float> Device::collectMeasurementData() {
     return dataCollector->collectData();
 }
 
-// Get measurement labels
 std::vector<std::string> Device::getMeasurementLabels() const {
     return dataCollector->getMeasurementLabels();
 }
@@ -387,12 +363,4 @@ std::vector<Metric> Device::getBodyRegionMetrics() const {
         metrics.push_back(pair.second);
     }
     return metrics;
-}
-
-std::string Device::getCurrentTimestamp() const {
-    auto now = std::chrono::system_clock::now();
-    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
-    char buffer[100];
-    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&currentTime));
-    return std::string(buffer);
 }

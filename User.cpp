@@ -15,7 +15,6 @@ std::string User::hashPassword(const std::string& password) const {
 }
 
 // Merged Constructor: we have two constructors from user code.
-// We'll keep the collaborator's full constructor and also add a simpler one if needed.
 User::User() : userID(-1), name(""), height(0.0f), weight(0.0f), dob(""), username(""), passwordHash("") {}
 
 User::User(int id, const std::string& name, float height, float weight, const std::string& dob)

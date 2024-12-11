@@ -4,14 +4,14 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QLabel>
 #include <QTextEdit>
-#include <QHBoxLayout>
+#include <QStackedWidget>
+#include <QProgressBar>
+#include <QTimer>
 #include <QString>
-#include <QFormLayout>
-#include <QtCharts/QChart>
 #include <QtCharts/QChartView>
-#include <QtCharts/QPieSeries>
-#include <QtCharts/QValueAxis>
+#include <QTabWidget>
 #include "Device.h"
 
 QT_CHARTS_USE_NAMESPACE
@@ -25,72 +25,104 @@ public:
     ~MainWindow();
 
 private slots:
+    void onWelcomeCreateProfileClicked();
+    void onCreateProfileClicked();
+    void onWelcomeLoginClicked();
     void onLoginClicked();
-    void onRegisterClicked();
     void onLogoutClicked();
+    void onBackToMenuClicked();
+    void onStartMeasurementClicked();
+    void onViewHistoricalDataClicked();
+    void onViewResultsClicked();
     void onUpdateProfileClicked();
     void onDeleteProfileClicked();
-    void onDisplayProfilesClicked();
     void onTakeMeasurementClicked();
     void onViewMetricsClicked();
-    void onConfirmActionClicked();
-    void onBackToMenuClicked();
-    void onApplyToSkinClicked();
-    void onLiftOffSkinClicked();
-    void clearCharts();
     void onShowRangesClicked();
     void onViewHistoryClicked();
+    void onMeasurementNowClicked();
+    void onDisplayProfilesClicked();
+    void onSkinOnClicked();
+    void onSkinOffClicked();
 
 private:
-    QVBoxLayout *mainLayout;
-    QChartView *chartView;          // For line chart
-    QChartView *bodyChartView;      // For body chart visualization
-    QChartView *pieChartView;       // For pie chart visualization
+    QString currentUser;
+    int currentMeasurementIndex;
+    void showUpdateProfileDialog();
+    void setupWelcomePage();
+    void setupLoginPage();
+    void setupMainMenu();
+    void setupCreateProfilePage();
+    void setupPostLoginPage();
+    void setupMeasurementPage();
+    void setupResultsPage();
+    void setupViewMetricsPage();
+    void setupUpdateProfilePage();
+    QString processMetricsForRecommendations(const std::vector<Metric> &metrics);
 
-    void showInitialButtons();
-    void showLoginMenu();
-    void showMainMenu();
-    void showField(QLineEdit *field, bool show);
+    void createBodyChart();
+    void createPieChart(const std::vector<HealthData> &allData);
+    void clearCharts();
+
+    // New functions to handle record-specific charts
+    QChartView* createBodyChartForRecord(const HealthData &record);
+    QChartView* createPieChartForRecord(const HealthData &record);
 
     Device myDevice;
+    QStackedWidget *stackedWidget;
 
-    // Input fields
+    QWidget *welcomePage;
+    QWidget *loginPage;
+    QWidget *mainMenuPage;
+    QWidget *createProfilePage;
+    QWidget *postLoginPage;
+    QWidget *measurementPage;
+    QWidget *resultsPage;
+    QWidget *viewMetricsPage;
+    QWidget *updateProfilePage;
+
+    // For viewMetricsPage
+    QTabWidget *metricsTabWidget;
+
     QLineEdit *usernameInput;
     QLineEdit *passwordInput;
     QLineEdit *nameInput;
     QLineEdit *heightInput;
     QLineEdit *weightInput;
     QLineEdit *dobInput;
+    QLineEdit *updateNameInput;
+    QLineEdit *updateHeightInput;
+    QLineEdit *updateWeightInput;
+    QLineEdit *updateDobInput;
 
-    // Buttons
-    QPushButton *loginButton;
-    QPushButton *registerButton;
+    QPushButton *confirmButton;
     QPushButton *logoutButton;
+    QPushButton *startMeasurementButton;
+    QPushButton *viewHistoricalDataButton;
+    QPushButton *viewResultsButton;
     QPushButton *updateButton;
     QPushButton *deleteButton;
     QPushButton *displayButton;
-    QPushButton *confirmButton;
-    QPushButton *backButton;
-    QPushButton *viewMetricsButton;
     QPushButton *takeMeasurementButton;
+    QPushButton *viewMetricsButton;
     QPushButton *showRangesButton;
     QPushButton *historyButton;
+    QPushButton *backButton;
+    QPushButton *confirmUpdateButton;
 
+    QTextEdit *resultsOutput;
+    QProgressBar *measurementProgressBar;
+    QTextEdit *measurementOutput;
+    QLabel *currentMeasurementLabel;
+    QLabel *skinContactStatusLabel;
+    QPushButton *skinOnButton;
+    QPushButton *skinOffButton;
 
-    // Layout pointers
-    QFormLayout *formLayout;
+    // For incremental measurements
+    int currentMeridianIndex;
+    std::vector<Metric> allMeridianMetrics;
 
-    // Output area
-    QTextEdit *outputArea;
-
-    // Action tracking
-    QString currentAction;
-
-    // Helper methods
-    void createBodyChart();
-    void createPieChart(const std::vector<HealthData> &allData);
-    QChartView* createBodyChartView();
-    QChartView* createPieChartView();
+    // For the view metrics page, previously we had metricsLabel, now replaced by a QTabWidget
 };
 
 #endif // MAINWINDOW_H

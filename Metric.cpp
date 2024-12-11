@@ -1,5 +1,9 @@
 #include "Metric.h"
 
+Metric::Metric()
+    : metricName(""), value(0.0f), status("Normal"), description(""),
+      minThreshold(0.0f), maxThreshold(200.0f) {}
+
 Metric::Metric(const std::string& name, float value, const std::string& status, const std::string& description,
                float minThreshold, float maxThreshold)
     : metricName(name), value(value), status(status), description(description),

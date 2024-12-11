@@ -37,17 +37,15 @@ private:
 
     static const int maxProfiles = 5;
 
-    // Body region metrics
+    // Body region metrics (last measured)
     std::map<std::string, Metric> bodyRegionMetrics;
 
-    // Private methods
     void initializeDefaultMetrics();
     static float normalizeValue(float rawValue, float rawMin = 0.0f, float rawMax = 200.0f,
                                 float targetMin = 80.0f, float targetMax = 120.0f);
     void depleteBatteryDuringOperation(float amount);
     void showLowPowerWarning() const;
 
-    // Utility method for timestamp generation
     std::string getCurrentTimestamp() const;
 
 public:
@@ -70,6 +68,8 @@ public:
     std::vector<User> getAllProfiles() const;
     const User* getUserProfile(const std::string& username) const;
 
+    bool isLoggedIn() const;
+
     // Skin contact
     void applyToSkin();
     void liftOffSkin();
@@ -81,7 +81,6 @@ public:
     void depleteBattery();
     void displayMetrics();
     void storeProcessedData(const std::vector<Metric>& metrics);
-    void storeProcessedData();
 
     float getBatteryLevel() const;
 
@@ -95,7 +94,6 @@ public:
     // Get metrics
     std::vector<Metric> getBodyRegionMetrics() const;
 
-    bool isLoggedIn() const;
 };
 
 #endif // DEVICE_H

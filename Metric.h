@@ -5,7 +5,7 @@
 
 class Metric {
 private:
-    std::string metricName;  // From your code
+    std::string metricName;
     float value;
     std::string status;
     std::string description;
@@ -13,7 +13,10 @@ private:
     float maxThreshold;
 
 public:
-    // Combine constructors: your constructor already covers all parameters.
+    // Default constructor to allow default-initialization
+    Metric();
+
+    // Parameterized constructor
     Metric(const std::string& name, float value, const std::string& status, const std::string& description,
            float minThreshold = 0.0f, float maxThreshold = 200.0f);
 
@@ -25,7 +28,7 @@ public:
     float getMaxThreshold() const;
 
     void setValue(float newValue);
-    void setStatus(const std::string& newStatus); // collaborator also had setStatus(), you have it too
+    void setStatus(const std::string& newStatus);
     void setThresholds(float minThreshold, float maxThreshold);
     bool isWithinRange() const;
 };
